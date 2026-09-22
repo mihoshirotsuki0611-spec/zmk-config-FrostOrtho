@@ -15,18 +15,14 @@
 #     shield: corne_left
 #     cmake-args: -DCONFIG_ZMK_USB_LOGGING=y
 #     artifact-name: corne_left_with_logging
-#
-
 include:
-- board: seeeduino_xiao_ble
-
-  shield: FrostOrtho_R
-
-  cmake-args: -DCONFIG_ZMK_USB_LOGGING=y
-
-  artifact-name: FrostOrtho_R_logging
   - board: seeeduino_xiao_ble
-    # shield: FrostOrtho_L rgbled_adapter # zmk-rgbled-widgetを使用する場合はこっちを使う
+    shield: FrostOrtho_R
+    cmake-args: -DCONFIG_ZMK_USB_LOGGING=y
+    artifact-name: FrostOrtho_R_logging
+
+  - board: seeeduino_xiao_ble
     shield: FrostOrtho_L
+
   - board: seeeduino_xiao_ble
     shield: settings_reset
