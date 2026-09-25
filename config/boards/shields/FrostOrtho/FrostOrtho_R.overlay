@@ -24,11 +24,11 @@
     require-prior-idle-ms = <400>;
     // AMLから離脱しないキー
     excluded-positions = <
-        6 // U 左クリック
+        5 // Y 左クリック
+        6 // U スクロール(L5)
         7 // I 右クリック
-        8 // O 中央クリック
         20 // Z Shift
-        30 // Control
+        30 // Del / Cmd
         32 // Alt
     >;
 };
@@ -61,7 +61,7 @@
         // input-processors = <&mouse_runtime_input_processor>;
         input-processors = <
             &mouse_runtime_input_processor
-            &zip_temp_layer 6 100000 // AMLレイヤー、タイムアウト時間
+            &zip_temp_layer 4 100000 // AMLレイヤー(4)、タイムアウト時間
             &zip_xy_scaler 2 3 // カーソル移動量2/3倍
             &zip_xy_transform INPUT_TRANSFORM_X_INVERT // カーソルの移動方向調整
             &zip_xy_transform INPUT_TRANSFORM_Y_INVERT // カーソルの移動方向調整
@@ -80,14 +80,11 @@
             &zip_scroll_y_scaler 2 3 // Y軸スクロール量2/3倍
         >;
     };
-    scroller_x {
-        layers = <7>; // 横スクロールレイヤー
-        input-processors = <
-            &zip_scroll_transform (INPUT_TRANSFORM_X_INVERT) // スクロール方向調整
-            &zip_xy_to_scroll_mapper
-            &zip_scroll_x_scaler 2 3 // X軸スクロール量2/3倍
-            &zip_scroll_y_scaler 0 3 // Y軸スクロール量0/3倍
-        >;
+    // 精密モード(レイヤー12): カーソル移動量を1/3に。process-nextで通常の処理も続けて通す
+    precision {
+        layers = <12>;
+        process-next;
+        input-processors = <&zip_xy_scaler 1 3>;
     };
 };
 
