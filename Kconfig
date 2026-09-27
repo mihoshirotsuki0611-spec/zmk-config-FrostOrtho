@@ -30,6 +30,7 @@ config FROST_FEATURES
     bool "DeXモード自動切替・電池残量通知"
     default y
     depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+    depends on ZMK_BLE && ZMK_BATTERY_REPORTING
 
 config FROST_DEX_PROFILES
     int "DeX(スマホ)につないでいる接続先(ビット: BT0=1, BT1=2, BT2=4, BT3=8, BT4=16)"
