@@ -3,6 +3,7 @@
  * Bluetooth の独自サービスでも通知する。中身は Mac 版(Raw HID)と同じパケット。
  */
 #include <zephyr/kernel.h>
+#include <zephyr/toolchain.h>
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/bluetooth/uuid.h>
 #include <string.h>
@@ -18,9 +19,13 @@ static struct bt_uuid_128 guide_chr_uuid =
     BT_UUID_INIT_128(BT_UUID_128_ENCODE(0x6f5a0002, 0x3c1d, 0x4e8a, 0x9b2e, 0x0f7a1c2d3e4f));
 
 static bool notify_on;
+__weak void frost_features_request_status(void) {}
 
 static void ccc_changed(const struct bt_gatt_attr *attr, uint16_t value) {
     notify_on = (value == BT_GATT_CCC_NOTIFY);
+    if (notify_on) {
+        frost_features_request_status(); /* つながったらすぐ今の状態を送る */
+    }
 }
 
 BT_GATT_SERVICE_DEFINE(frost_guide_svc, BT_GATT_PRIMARY_SERVICE(&guide_svc_uuid),

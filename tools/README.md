@@ -12,7 +12,7 @@
 | ガイド生成(Mac版 html と Android アプリ内 html を同時に出力) | `tools/guide_gen.py` + `tools/guide_tpl.html`(機能一覧 FEATURES もここ) |
 | トラボ設定(速度・AML・スクロール縦横固定・精密モード) | `config/boards/shields/FrostOrtho/FrostOrtho_R.overlay` |
 | 右手の設定(LED・DeXの接続先 CONFIG_FROST_DEX_PROFILES など) | `config/boards/shields/FrostOrtho/FrostOrtho_R.conf` |
-| 自作機能(C) | `src/`:status_led(LED)、scroll_snap(縦横固定)、behavior_drag_lock、frost_features(DeX自動切替・電池/状態通知)、frost_ble_guide(Android版へBLE通知) |
+| 自作機能(C) | `src/`:status_led(LED)、scroll_snap(縦横固定)、aml_gate(マウスモードへの誤復帰防止。overlay の zip_aml_gate threshold で調整)、behavior_drag_lock、frost_features(DeX自動切替・電池/状態通知)、frost_ble_guide(Android版へBLE通知) |
 | Android(DeX)版ガイドアプリ | `android/`(GitHub Actions `Build Android Guide` で APK を作る)。F13(キー番号39)の長押し/2回タップで音声入力(VoiceInput.java、文字入れは FrostInputService=ユーザー補助) |
 
 ## 主な決めごと(美穂さんと合意済み)

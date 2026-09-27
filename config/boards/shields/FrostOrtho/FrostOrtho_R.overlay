@@ -71,6 +71,14 @@
         release-ms = <200>;   // 止めてからこの時間で固定解除
         ratio-percent = <150>; // 横が縦の1.5倍を超えたら横スクロール
     };
+    // マウスモードでないときは、ボールをはっきり転がすまでマウスモードに入らない(カーソルも動かない)
+    zip_aml_gate: zip_aml_gate {
+        compatible = "zmk,input-processor-aml-gate";
+        #input-processor-cells = <0>;
+        layer = <4>;
+        threshold = <60>; // 入るのに必要な移動量(約1mm)。戻りやすければ大きく、入りにくければ小さく
+        window-ms = <250>;
+    };
 };
 
 / {
@@ -82,6 +90,7 @@
         // input-processors = <&mouse_runtime_input_processor>;
         input-processors = <
             &mouse_runtime_input_processor
+            &zip_aml_gate // 小さな動きではマウスモードに入らない
             &zip_temp_layer 4 100000 // AMLレイヤー(4)、タイムアウト時間
             &zip_xy_scaler 3 5 // カーソル移動量3/5倍(2/3から少し遅く)
             &zip_xy_transform INPUT_TRANSFORM_X_INVERT // カーソルの移動方向調整

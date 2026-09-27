@@ -26,6 +26,7 @@ public class MainActivity extends Activity {
 
     static final String PREFS = "frost_guide";
     static final String KEY_SIZE = "size_dp";
+    static final String KEY_FULL = "full";
 
     private TextView status;
 
@@ -61,9 +62,11 @@ public class MainActivity extends Activity {
         sizes.addView(button("小", v -> setSize(380), false));
         sizes.addView(button("中", v -> setSize(480), false));
         sizes.addView(button("大", v -> setSize(600), false));
+        sizes.addView(button("全画面", v -> setFull(), false));
         root.addView(sizes);
 
-        root.addView(text("小窓の上のバーをドラッグすると動かせます。「ー」で小さく畳めます。", 13, false));
+        root.addView(text("小窓の上のバーをドラッグすると動かせます。「□」で全画面ともとの大きさを切り替え、「ー」で小さく畳めます。", 13, false));
+        root.addView(text("音声入力とスクショキーは、キーボードがスマホにつながっているとき(DeXの接続先)だけ反応します。", 13, false));
 
         ScrollView scroll = new ScrollView(this);
         scroll.setBackgroundColor(0xFFF6EFE0);
@@ -122,9 +125,16 @@ public class MainActivity extends Activity {
         status.setText("ガイドを表示しました。");
     }
 
+    private void setFull() {
+        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putBoolean(KEY_FULL, true).apply();
+        Intent i = new Intent(this, OverlayService.class).setAction(OverlayService.ACTION_RESIZE);
+        if (OverlayService.running) startService(i);
+        status.setText("全画面にしました。小窓の上のバーの「□」でもとの大きさに戻ります。");
+    }
+
     private void setSize(int widthDp) {
         SharedPreferences p = getSharedPreferences(PREFS, MODE_PRIVATE);
-        p.edit().putInt(KEY_SIZE, widthDp).apply();
+        p.edit().putInt(KEY_SIZE, widthDp).putBoolean(KEY_FULL, false).apply();
         Intent i = new Intent(this, OverlayService.class).setAction(OverlayService.ACTION_RESIZE);
         if (OverlayService.running) startService(i);
         status.setText("小窓の幅を " + widthDp + "dp にしました。");

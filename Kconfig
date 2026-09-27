@@ -20,6 +20,11 @@ config FROST_SCROLL_SNAP
     default y
     depends on DT_HAS_ZMK_INPUT_PROCESSOR_SCROLL_SNAP_ENABLED
 
+config FROST_AML_GATE
+    bool "マウスモードへの誤復帰防止"
+    default y
+    depends on DT_HAS_ZMK_INPUT_PROCESSOR_AML_GATE_ENABLED
+
 config FROST_DRAG_LOCK
     bool "ドラッグ固定キー"
     default y

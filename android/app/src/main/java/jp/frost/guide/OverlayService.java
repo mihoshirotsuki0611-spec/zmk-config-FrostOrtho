@@ -59,6 +59,8 @@ public class OverlayService extends Service {
     private BluetoothGatt gatt;
     private boolean pageReady = false;
     private VoiceInput voice;
+    // キー入力がいまスマホに届いているか(キーボードの状態パケットで分かる)。Mac 使用中は音声入力・スクショに反応しない
+    private volatile boolean keysToPhone = false;
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -143,6 +145,13 @@ public class OverlayService extends Service {
         fold.setTextSize(14);
         fold.setGravity(Gravity.CENTER);
         fold.setOnClickListener(v -> toggleFold());
+        TextView full = new TextView(this);
+        full.setText("□");
+        full.setTextColor(0xFF5B4A3A);
+        full.setTextSize(14);
+        full.setGravity(Gravity.CENTER);
+        full.setOnClickListener(v -> toggleFull());
+        bar.addView(full, new LinearLayout.LayoutParams(dp(32), dp(24)));
         bar.addView(fold, new LinearLayout.LayoutParams(dp(32), dp(24)));
         box.addView(bar);
 
@@ -196,8 +205,33 @@ public class OverlayService extends Service {
         applySize();
     }
 
+    private boolean isFull() {
+        return getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE).getBoolean(MainActivity.KEY_FULL, false);
+    }
+
+    private void toggleFull() {
+        getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE).edit().putBoolean(MainActivity.KEY_FULL, !isFull()).apply();
+        folded = false;
+        applySize();
+    }
+
     private void applySize() {
         if (box == null) return;
+        if (isFull() && !folded) {
+            // 全画面: 画面いっぱいに広げる(上のバーの「□」でもとの大きさに戻る)
+            android.graphics.Rect r = Build.VERSION.SDK_INT >= 30
+                    ? wm.getCurrentWindowMetrics().getBounds()
+                    : new android.graphics.Rect(0, 0, getResources().getDisplayMetrics().widthPixels,
+                            getResources().getDisplayMetrics().heightPixels);
+            web.setLayoutParams(new LinearLayout.LayoutParams(r.width(), Math.max(0, r.height() - dp(28))));
+            web.setVisibility(View.VISIBLE);
+            lp.width = r.width();
+            lp.x = 0;
+            lp.y = 0;
+            wm.updateViewLayout(box, lp);
+            return;
+        }
+        if (lp.x == 0 && lp.y == 0) { lp.x = dp(40); lp.y = dp(80); }
         int w = getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE).getInt(MainActivity.KEY_SIZE, 480);
         int webH = folded ? 0 : Math.round(w * 0.56f);
         web.setLayoutParams(new LinearLayout.LayoutParams(dp(w), dp(webH)));
@@ -285,19 +319,41 @@ public class OverlayService extends Service {
     // ---------- ガイド(HTML)へ渡す ----------
     private void pushPacket(byte[] v) {
         if (v == null) return;
+        // 状態パケット [0xC1, 大文字, ドラッグ, 接続先, 接続中, スマホへ入力中]
+        if (v.length >= 6 && (v[0] & 0xFF) == 0xC1) {
+            boolean now = v[5] != 0;
+            if (keysToPhone && !now) {
+                // Mac に切り替わったら、ガイドの表示を基本レイヤーに戻しておく
+                sendToPage(new byte[]{(byte) 0xFF, 0, 0, 0, 0, 0, 1, 0, 0, 0});
+            }
+            keysToPhone = now;
+        }
+        // Mac 使用中は、キー押下とレイヤーの変化をガイドに渡さない(電池・状態は渡す)
+        int kind = v.length > 0 ? (v[0] & 0xFF) : 0;
+        if (!keysToPhone && (kind == 0xF1 || kind == 0xFF)) {
+            if (kind == 0xF1 && v.length >= 4 && v[3] == 0 && (v[2] & 0xFF) == VoiceInput.F13_POSITION) {
+                main.post(() -> { if (voice != null) voice.onKey(false); });
+            }
+            return;
+        }
         // F13 の押下・離しは音声入力へ(0xF1: キー押下パケット [0xF1, 0, 位置, 押した=1])
         if (v.length >= 4 && (v[0] & 0xFF) == 0xF1 && (v[2] & 0xFF) == VoiceInput.F13_POSITION) {
             final boolean down = v[3] != 0;
-            main.post(() -> { if (voice != null) voice.onKey(down); });
+            // 押したときはスマホに入力中のときだけ。離したときは、聞き取り中に止められるよういつも渡す
+            if (!down || keysToPhone) main.post(() -> { if (voice != null) voice.onKey(down); });
         }
         // 右下のキー(位置40)を押したら範囲スクショ(DeXモード中はキーボードからは何も送らず、ここで処理する)
-        if (v.length >= 4 && (v[0] & 0xFF) == 0xF1 && (v[2] & 0xFF) == SHOT_POSITION && v[3] != 0) {
+        if (v.length >= 4 && (v[0] & 0xFF) == 0xF1 && (v[2] & 0xFF) == SHOT_POSITION && v[3] != 0 && keysToPhone) {
             main.post(() -> {
                 if (!FrostInputService.startRegionShot(this::pushVoice)) {
                     pushVoice("error", "ユーザー補助で「FrostOrtho 音声入力」をオンにしてください");
                 }
             });
         }
+        sendToPage(v);
+    }
+
+    private void sendToPage(byte[] v) {
         StringBuilder sb = new StringBuilder("window.frostPacket&&frostPacket([");
         for (int i = 0; i < v.length; i++) { if (i > 0) sb.append(','); sb.append(v[i] & 0xFF); }
         sb.append("])");

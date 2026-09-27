@@ -1,0 +1,19 @@
+description: マウスモードでないとき、ボールがはっきり転がるまで動きを捨てる(マウスモードへの誤復帰を防ぐ)
+
+compatible: "zmk,input-processor-aml-gate"
+
+include: ip_zero_param.yaml
+
+properties:
+  layer:
+    type: int
+    default: 4
+    description: マウスモードのレイヤー番号
+  threshold:
+    type: int
+    default: 60
+    description: マウスモードに入るのに必要な移動量(センサーのカウント。1500CPIで約60=1mm)
+  window-ms:
+    type: int
+    default: 250
+    description: この時間ボールが止まると、たまった移動量をリセットする

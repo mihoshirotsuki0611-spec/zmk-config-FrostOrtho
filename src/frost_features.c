@@ -12,6 +12,7 @@
 #include <zmk/keymap.h>
 #include <zmk/ble.h>
 #include <zmk/battery.h>
+#include <zmk/endpoints.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/battery_state_changed.h>
 
@@ -67,7 +68,7 @@ static void send_battery(void) {
     raise_raw_hid_sent_event((struct raw_hid_sent_event){.data = batt_buf, .length = sizeof(batt_buf)});
 }
 
-/* ---------- 状態をガイドへ(大文字モード・ドラッグ固定・接続先) ---------- */
+/* ---------- 状態をガイドへ(大文字モード・ドラッグ固定・接続先・スマホへ入力中か) ---------- */
 #define STATUS_PACKET_MARKER 0xC1
 __weak bool frost_drag_lock_held(void) { return false; }
 
@@ -81,11 +82,20 @@ static bool caps_active(void) { return false; }
 #endif
 
 static uint8_t status_buf[CONFIG_RAW_HID_REPORT_SIZE];
-static uint8_t last_status[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+static uint8_t last_status[5] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+/* いまキー入力がスマホ(DeXの接続先)へ届いているか。USB出力中や Mac の接続先なら 0 */
+static bool keys_to_phone(void) {
+    struct zmk_endpoint_instance ep = zmk_endpoints_selected();
+    if (ep.transport != ZMK_TRANSPORT_BLE) {
+        return false;
+    }
+    return (CONFIG_FROST_DEX_PROFILES >> zmk_ble_active_profile_index()) & 1;
+}
 
 static void send_status(bool force) {
-    uint8_t now[4] = {caps_active(), frost_drag_lock_held(), (uint8_t)zmk_ble_active_profile_index(),
-                      zmk_ble_active_profile_is_connected()};
+    uint8_t now[5] = {caps_active(), frost_drag_lock_held(), (uint8_t)zmk_ble_active_profile_index(),
+                      zmk_ble_active_profile_is_connected(), keys_to_phone()};
     if (!force && memcmp(now, last_status, sizeof(now)) == 0) {
         return;
     }
@@ -110,6 +120,9 @@ static void batt_work_cb(struct k_work *work) {
     send_status(true);
     k_work_schedule(&batt_work, K_SECONDS(30));
 }
+
+/* Android版ガイドがつながった直後に、状態をすぐ送る */
+void frost_features_request_status(void) { k_work_reschedule(&batt_work, K_MSEC(300)); }
 
 static int battery_listener(const zmk_event_t *eh) {
     k_work_reschedule(&batt_work, K_MSEC(200));
