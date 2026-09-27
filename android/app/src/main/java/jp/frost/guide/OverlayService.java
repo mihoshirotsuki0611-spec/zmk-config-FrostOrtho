@@ -153,6 +153,7 @@ public class OverlayService extends Service {
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
         s.setAllowFileAccess(true);
+        s.setDomStorageEnabled(true); // 練習の記録を残す
         s.setBuiltInZoomControls(false);
         web.setVerticalScrollBarEnabled(false);
         web.setHorizontalScrollBarEnabled(false);

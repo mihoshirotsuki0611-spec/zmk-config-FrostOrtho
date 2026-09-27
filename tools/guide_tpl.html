@@ -56,6 +56,24 @@ if(location.hash==='#android'){document.documentElement.classList.add('android')
 .fitem span{color:#7a6754}
 .fitem kbd{font-family:inherit;font-weight:700;background:#f4ecdc;border-radius:6px;padding:0 5px;color:#5b4a3a}
 @media (max-width:520px){.fitem{grid-template-columns:1fr}}
+#ov .pbtn{flex-shrink:0;height:24px;border-radius:999px;border:0;padding:0 10px;background:#fff;color:var(--ink);font:inherit;font-weight:800;font-size:11px;cursor:pointer;box-shadow:0 2px 0 var(--cap-shadow)}
+#ov .pbtn:focus-visible{outline:3px solid var(--press)}
+#ov.practice .pbtn{background:var(--leaf);color:#fff;box-shadow:0 2px 0 var(--leaf-deep)}
+#ov .prac{display:none;flex-direction:column;gap:6px;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 2px 0 var(--cap-shadow)}
+#ov.practice .prac{display:flex}
+#ov.practice .foot,#ov.practice .badges{display:none}
+#ov .prac .jp{font-size:15px;font-weight:800;letter-spacing:.02em}
+#ov .prac .rm{font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.06em;word-break:break-all}
+#ov .prac .rm .ok{color:var(--leaf-deep)}
+#ov .prac .rm .cur{background:var(--press);border-radius:4px;padding:0 1px}
+#ov .prac .rm .rest{color:var(--mute)}
+#ov .prac .stats{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mute)}
+#ov .prac .stats b{color:var(--ink)}
+#ov .prac .tip{font-size:10.5px;color:var(--mute)}
+#ov .prac.miss{animation:shake .18s}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+#ov .k.next{box-shadow:0 0 0 3px var(--press),0 3px 0 var(--cap-shadow);background:#fff6cf;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#ov .prac.miss{animation:none}}
 #ov .halves{display:flex;gap:12px}
 #ov .half{flex:1;background:var(--tone-soft,#f7f0e1);border-radius:18px;padding:8px;display:grid;gap:6px;}
 #ov .L{grid-template-columns:repeat(6,1fr)}
@@ -108,7 +126,8 @@ button:focus-visible{outline:3px solid #ffd54a;outline-offset:2px}
   <div id="msg"></div>
   <div id="home">
   <div id="ov">
-    <div class="bar"><span class="chip" id="lname">基本</span><span class="hint" id="lhint"></span><span class="enc" id="lenc"></span><span class="conn"><span id="batt"></span><span id="st">未接続</span><span class="dot" id="dot"></span></span><button class="helpbtn" id="helpbtn" title="機能一覧">？</button></div>
+    <div class="bar"><span class="chip" id="lname">基本</span><span class="hint" id="lhint"></span><span class="enc" id="lenc"></span><span class="conn"><span id="batt"></span><span id="st">未接続</span><span class="dot" id="dot"></span></span><button class="pbtn" id="pbtn" title="文字打ちの練習">練習</button><button class="helpbtn" id="helpbtn" title="機能一覧">？</button></div>
+    <div class="prac" id="prac"></div>
     <div class="badges" id="badges"></div>
     <div class="halves"><div class="half L" id="hl"></div><div class="half R" id="hr"></div></div>
     <div class="foot" id="foot"></div>
@@ -139,7 +158,7 @@ function cell(pos,layer){
   const el=document.createElement('div');
   if(pos<0){el.className='k pad';return el;}
   const {k,own}=resolve(pos,layer,mask);
-  el.className='k '+(k.k==='key'?(k.s&&layer!==0?'act':''):k.k)+(own?'':' ghost')+(down.has(pos)?' down':'');
+  el.className='k '+(k.k==='key'?(k.s&&layer!==0?'act':''):k.k)+(own?'':' ghost')+(down.has(pos)?' down':'')+(PR.on&&pos===PR.nextPos?' next':'');
   if(k.k!=='none'){
     if(k.h){const h=document.createElement('span');h.className='h';h.textContent=k.h;el.appendChild(h);}
     const t=document.createElement('span');t.className='t';t.textContent=k.t||'';el.appendChild(t);
@@ -198,7 +217,7 @@ function onReport(e){
   if(b[i]===0xFF){ mask=(b[i+6]|(b[i+7]<<8)|(b[i+8]<<16)|(b[i+9]<<24))>>>0 || 1; render(); }
   else if(b[i]===0xC1){ st={caps:b[i+1],drag:b[i+2],prof:b[i+3],conn:b[i+4]}; render(); }
   else if(b[i]===0xB1){ const f=v=>v===255?'--':v+'%'; batt='左 '+f(b[i+1])+' ・ 右 '+f(b[i+2]); render(); }
-  else if(b[i]===0xF1){ const p=b[i+2]; if(b[i+3]) down.add(p); else down.delete(p); onKey(p,!!b[i+3]); render(); }
+  else if(b[i]===0xF1){ const p=b[i+2]; if(b[i+3]) down.add(p); else down.delete(p); onKey(p,!!b[i+3]); if(b[i+3]) practiceKey(p); render(); }
 }
 async function openDev(d){
   try{ if(!d.opened) await d.open(); dev=d; d.addEventListener('inputreport',onReport); setStatus(true,'接続中'); $('msg').textContent=''; }
@@ -248,7 +267,7 @@ const FEATURES=[
   ['マウスモード','ボールを動かすと自動で切り替わる。ほかの文字キーを打つと戻る'],
   ['クリック','<kbd>Y</kbd> 左クリック ・ <kbd>I</kbd> 右クリック'],
   ['スクロール','<kbd>U</kbd> を押しながら転がす(または <kbd>K</kbd>+<kbd>L</kbd> 同時押し)。縦か横か、動かし始めの向きで決まる'],
-  ['編集','マウスモード中に <kbd>Z</kbd> 取り消し ・ <kbd>X</kbd> 切り取り ・ <kbd>C</kbd> コピー ・ <kbd>V</kbd> 貼り付け(DeXでは自動で⌃に)'],
+  ['編集','マウスモード中に <kbd>Z</kbd> 取り消し ・ <kbd>X</kbd> 切り取り ・ <kbd>C</kbd> コピー ・ <kbd>V</kbd> 貼り付け ・ <kbd>B</kbd> Enter ・ <kbd>A</kbd> 全選択 ・ <kbd>D</kbd> 削除 ・ <kbd>F</kbd> ページ内検索 ・ <kbd>E</kbd>/<kbd>R</kbd> 戻る/進む ・ <kbd>Q</kbd> Esc(マウスモードのまま使える。DeXでは自動でスマホ用に)'],
   ['ドラッグ固定','マウスモード中に <kbd>O</kbd> → 押しっぱなしに。もう一度 <kbd>O</kbd> で離す(マウスモードを出ても自動で離す)'],
   ['精密モード','Tab 長押し + <kbd>L</kbd> でオン → カーソルがゆっくりに。右下のキーでオフ'],
  ]},
@@ -266,6 +285,7 @@ const FEATURES=[
   ['書き込みモード','<kbd>O</kbd>+<kbd>B</kbd>+<kbd>T</kbd> 同時押し(ファームウェアを入れ替えるとき)'],
  ]},
  {g:'このガイド',c:'#e3dcff',items:[
+  ['文字打ちの練習','小窓の「練習」→ 仕事でよく打つ文がローマ字で出る。光っているキーを押していく。正確さ・速さ(打/分)・苦手なキーを記録。もう一度「練習」で終了'],
   ['レイヤー表示','レイヤーキーを長押しすると、そのレイヤーで何ができるかが出る'],
   ['状態の札','大文字モード中・ドラッグ中・接続先・DeXモードが上に出る'],
   ['電池残量','右上に左右の電池残量'],
@@ -277,6 +297,97 @@ function featuresHTML(){
 document.getElementById('flist').innerHTML=featuresHTML();
 document.getElementById('help').innerHTML=featuresHTML();
 document.getElementById('helpbtn').onclick=()=>{ OV.classList.toggle('showhelp'); };
+// ---- 文字打ちの練習(キーボードから届くキー押下で判定。どの画面にいても練習できる) ----
+const PHRASES=[
+ ['お疲れ様です','おつかれさまです'],['よろしくお願いします','よろしくおねがいします'],['確認します','かくにんします'],
+ ['承知しました','しょうちしました'],['ありがとうございます','ありがとうございます'],['いつもお世話になっております','いつもおせわになっております'],
+ ['ご確認ください','ごかくにんください'],['資料をお送りします','しりょうをおおくりします'],['検討します','けんとうします'],
+ ['対応します','たいおうします'],['入金を確認しました','にゅうきんをかくにんしました'],['契約書を送付します','けいやくしょをそうふします'],
+ ['本日はありがとうございました','ほんじつはありがとうございました'],['今後ともよろしくお願いいたします','こんごともよろしくおねがいいたします'],
+ ['申し訳ございません','もうしわけございません'],['少々お待ちください','しょうしょうおまちください'],['共有します','きょうゆうします'],
+ ['修正しました','しゅうせいしました'],['日程を調整します','にっていをちょうせいします'],['後ほどご連絡します','のちほどごれんらくします'],
+];
+// かな → ローマ字(先頭が標準、ほかの打ち方も正解にする)
+const KANA={あ:['a'],い:['i'],う:['u'],え:['e'],お:['o'],か:['ka'],き:['ki'],く:['ku'],け:['ke'],こ:['ko'],さ:['sa'],し:['si','shi'],す:['su'],せ:['se'],そ:['so'],
+ た:['ta'],ち:['ti','chi'],つ:['tu','tsu'],て:['te'],と:['to'],な:['na'],に:['ni'],ぬ:['nu'],ね:['ne'],の:['no'],は:['ha'],ひ:['hi'],ふ:['hu','fu'],へ:['he'],ほ:['ho'],
+ ま:['ma'],み:['mi'],む:['mu'],め:['me'],も:['mo'],や:['ya'],ゆ:['yu'],よ:['yo'],ら:['ra'],り:['ri'],る:['ru'],れ:['re'],ろ:['ro'],わ:['wa'],を:['wo'],ん:['nn','n'],
+ が:['ga'],ぎ:['gi'],ぐ:['gu'],げ:['ge'],ご:['go'],ざ:['za'],じ:['zi','ji'],ず:['zu'],ぜ:['ze'],ぞ:['zo'],だ:['da'],ぢ:['di'],づ:['du'],で:['de'],ど:['do'],
+ ば:['ba'],び:['bi'],ぶ:['bu'],べ:['be'],ぼ:['bo'],ぱ:['pa'],ぴ:['pi'],ぷ:['pu'],ぺ:['pe'],ぽ:['po'],ー:['-']};
+const YOON={ゃ:'a',ゅ:'u',ょ:'o'};
+const YBASE={き:['ky'],し:['sy','sh'],ち:['ty','ch','cy'],に:['ny'],ひ:['hy'],み:['my'],り:['ry'],ぎ:['gy'],じ:['zy','j','jy'],び:['by'],ぴ:['py']};
+function tokenize(kana){
+  const t=[]; const a=[...kana];
+  for(let i=0;i<a.length;i++){
+    const c=a[i], n=a[i+1];
+    if(c==='っ'){ const nx=tokenize(a.slice(i+1).join(''))[0]; if(nx){ const alts=nx.map(r=>r[0]+r); t.push({dbl:true,alts}); i+=nextLen(a,i+1); continue; } }
+    if(n&&YOON[n]&&YBASE[c]){ t.push(YBASE[c].map(b=>b+YOON[n])); i++; continue; }
+    t.push(KANA[c]||[c]);
+  }
+  // 「ん」の次があ行・な行・や行・ん なら n 1つでは打てない
+  for(let i=0;i<t.length;i++){ if(Array.isArray(t[i])&&t[i][0]==='nn'){ const nx=t[i+1]; const f=nx?(Array.isArray(nx)?nx[0]:nx.alts[0])[0]:''; if(!nx||'aiueony'.includes(f)) t[i]=['nn']; } }
+  return t.map(x=>Array.isArray(x)?x:x.alts);
+}
+function nextLen(a,i){ const c=a[i],n=a[i+1]; return (n&&YOON[n]&&YBASE[c])?2:1; }
+const PR={on:false,idx:0,tokens:[],ti:0,buf:'',done:'',nextPos:-1,hits:0,miss:0,start:0,keys:0,weak:{},best:null};
+try{ const sv=JSON.parse(localStorage.getItem('frost-practice')||'null'); if(sv){PR.weak=sv.weak||{};PR.best=sv.best||null;} }catch(e){}
+function saveP(){ try{ localStorage.setItem('frost-practice',JSON.stringify({weak:PR.weak,best:PR.best})); }catch(e){} }
+// 位置 → 文字(基本レイヤーのタップ文字)
+const POS2CH={}, CH2POS={};
+(LAYERS[0]?LAYERS[0].keys:[]).forEach((k,i)=>{ let t=(k.t||'').toLowerCase(); if(k.k==='mt'&&t==='z') t='z'; if(t.length===1){ POS2CH[i]=t; if(!(t in CH2POS)) CH2POS[t]=i; } });
+function pickPhrase(){
+  // 苦手なキーを多く含むお題を少し出やすくする
+  const w=PHRASES.map(([,r])=>1+[...r].reduce((a,c)=>a,0));
+  PR.idx=Math.floor(Math.random()*PHRASES.length);
+  PR.tokens=tokenize(PHRASES[PR.idx][1]); PR.ti=0; PR.buf=''; PR.done='';
+}
+function expected(){ // いま打つべき候補(未入力部分)
+  const t=PR.tokens[PR.ti]; if(!t) return null;
+  const c=t.filter(r=>r.startsWith(PR.buf)); return c.length?c:t;
+}
+function updNext(){ const c=expected(); PR.nextPos=c?(CH2POS[c[0][PR.buf.length]]??-1):-1; }
+function practiceKey(p){
+  if(!PR.on) return;
+  if((mask&~1&~(1<<8))>>>0) return;            // レイヤー中の押下は数えない
+  const ch=POS2CH[p]; if(!ch) return;
+  if(!PR.start) PR.start=Date.now();
+  PR.keys++;
+  const cands=expected(); if(!cands) return;
+  const want=cands[0][PR.buf.length];
+  const ok=cands.filter(r=>r[PR.buf.length]===ch);
+  if(ok.length){
+    PR.hits++; PR.buf+=ch;
+    if(ok.some(r=>r===PR.buf)){ PR.done+=PR.buf; PR.buf=''; PR.ti++; }
+    if(PR.ti>=PR.tokens.length){ finishPhrase(); }
+  }else{
+    PR.miss++; PR.weak[want]=(PR.weak[want]||0)+1; saveP();
+    const el=OV.ownerDocument.getElementById('prac'); el.classList.remove('miss'); void el.offsetWidth; el.classList.add('miss');
+  }
+  updNext(); renderPractice();
+}
+function finishPhrase(){
+  const min=(Date.now()-PR.start)/60000, kpm=min>0?Math.round(PR.keys/min):0;
+  if(!PR.best||kpm>PR.best) { PR.best=kpm; saveP(); }
+  PR.last=kpm; pickPhrase(); PR.start=0; PR.keys=0;
+}
+function renderPractice(){
+  const el=OV.ownerDocument.getElementById('prac'); if(!el) return;
+  if(!PR.on){ el.innerHTML=''; return; }
+  const [jp]=PHRASES[PR.idx]||['',''];
+  const cands=expected(); const cur=cands?cands[0]:''; 
+  const rest=PR.tokens.slice(PR.ti+1).map(t=>t[0]).join('');
+  const acc=PR.hits+PR.miss?Math.round(PR.hits*100/(PR.hits+PR.miss)):100;
+  const weak=Object.entries(PR.weak).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c])=>c.toUpperCase()).join(' ・ ')||'まだなし';
+  el.innerHTML='<div class="jp">'+jp+'</div>'+
+    '<div class="rm"><span class="ok">'+PR.done+PR.buf+'</span><span class="cur">'+(cur.slice(PR.buf.length,PR.buf.length+1)||'')+'</span><span class="rest">'+cur.slice(PR.buf.length+1)+rest+'</span></div>'+
+    '<div class="stats"><span>正確さ <b>'+acc+'%</b></span><span>前回 <b>'+(PR.last??'-')+'</b> 打/分</span><span>最高 <b>'+(PR.best??'-')+'</b> 打/分</span><span>苦手 <b>'+weak+'</b></span></div>'+
+    '<div class="tip">光っているキーを押す。ほかのアプリの入力欄にカーソルがない状態で練習してください。もう一度「練習」でおしまい。</div>';
+}
+document.getElementById('pbtn').onclick=()=>{
+  PR.on=!PR.on; OV.classList.toggle('practice',PR.on); OV.classList.remove('showhelp');
+  if(PR.on){ pickPhrase(); PR.hits=0; PR.miss=0; PR.start=0; PR.keys=0; updNext(); }
+  renderPractice(); render();
+};
+
 // Android(DeX)版アプリから呼ばれる入口
 window.frostPacket=arr=>onReport({data:new DataView(new Uint8Array(arr).buffer)});
 window.frostStatus=(on,text)=>setStatus(on,text);

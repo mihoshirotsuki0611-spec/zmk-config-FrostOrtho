@@ -153,9 +153,9 @@
         layer_4 {
             display-name = "mouse";
             bindings = <
-&trans            &trans            &trans            &trans            &trans                &mkp MB1          &mo 5             &mkp MB2          &drag_lock        &trans            
-&trans            &trans            &trans            &trans            &trans                &trans            &trans            &trans            &trans            &trans            
-&mt LSHIFT LG(Z)  &kp LG(X)         &kp LG(C)         &kp LG(V)         &trans                &trans            &trans            &trans            &trans            &trans            
+&kp ESC           &trans            &kp LG(LBKT)      &kp LG(RBKT)      &trans                &mkp MB1          &mo 5             &mkp MB2          &drag_lock        &trans            
+&kp LG(A)         &trans            &kp BSPC          &kp LG(F)         &trans                &trans            &trans            &trans            &trans            &trans            
+&mt LSHIFT LG(Z)  &kp LG(X)         &kp LG(C)         &kp LG(V)         &kp RET               &trans            &trans            &trans            &trans            &trans            
 &trans            &trans            &trans            &trans            &trans            &trans                &trans            &trans            &trans            &trans            &trans            
             >;
             sensor-bindings = <&rsr_trans>;
@@ -219,8 +219,8 @@
         layer_10 {
             display-name = "DeX Mouse";
             bindings = <
-&trans            &trans            &trans            &trans            &trans                &trans            &trans            &trans            &trans            &trans            
-&trans            &trans            &trans            &trans            &trans                &trans            &trans            &trans            &trans            &trans            
+&trans            &trans            &kp LA(LEFT)      &kp LA(RIGHT)     &trans                &trans            &trans            &trans            &trans            &trans            
+&kp LC(A)         &trans            &trans            &kp LC(F)         &trans                &trans            &trans            &trans            &trans            &trans            
 &mt LSHIFT LC(Z)  &kp LC(X)         &kp LC(C)         &kp LC(V)         &trans                &trans            &trans            &trans            &trans            &trans            
 &trans            &trans            &trans            &trans            &trans            &trans                &trans            &trans            &trans            &trans            &trans            
             >;
