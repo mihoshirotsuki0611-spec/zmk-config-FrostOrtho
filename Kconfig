@@ -1,0 +1,42 @@
+config FROST_STATUS_LED
+    bool "Conductor風のステータスLED(接続先ごとの色・待機中の点滅・レイヤー色)"
+    depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+    select GPIO
+
+if FROST_STATUS_LED
+
+config FROST_STATUS_LED_SLOW_BLINK_MS
+    int "接続先あり・待機中の点滅(片側の時間 ms)"
+    default 600
+
+config FROST_STATUS_LED_FAST_BLINK_MS
+    int "接続先なし・待機中の点滅(片側の時間 ms)"
+    default 150
+
+endif
+
+config FROST_SCROLL_SNAP
+    bool "スクロールの縦横固定"
+    default y
+    depends on DT_HAS_ZMK_INPUT_PROCESSOR_SCROLL_SNAP_ENABLED
+
+config FROST_DRAG_LOCK
+    bool "ドラッグ固定キー"
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_FROST_DRAG_LOCK_ENABLED
+    depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+
+config FROST_FEATURES
+    bool "DeXモード自動切替・電池残量通知"
+    default y
+    depends on !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+
+config FROST_DEX_PROFILES
+    int "DeX(スマホ)につないでいる接続先(ビット: BT0=1, BT1=2, BT2=4, BT3=8, BT4=16)"
+    default 2
+    depends on FROST_FEATURES
+
+config FROST_BLE_GUIDE
+    bool "DeX(Android)版レイヤーガイドへの通知(Bluetooth)"
+    default y
+    depends on RAW_HID && ZMK_BLE && (!ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL)

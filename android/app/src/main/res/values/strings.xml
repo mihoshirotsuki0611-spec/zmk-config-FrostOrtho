@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="acc_desc">FrostOrtho ガイドの音声入力で、聞き取った文字を入力中の欄に入れるために使います。キーボードの F13 を長押し、または2回タップしたときだけ動きます。範囲スクショ(右下のキー)で画面を撮るときにも使います。</string>
+</resources>

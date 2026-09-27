@@ -1,0 +1,5 @@
+target_sources_ifdef(CONFIG_FROST_STATUS_LED app PRIVATE src/status_led.c)
+target_sources_ifdef(CONFIG_FROST_SCROLL_SNAP app PRIVATE src/scroll_snap.c)
+target_sources_ifdef(CONFIG_FROST_DRAG_LOCK app PRIVATE src/behavior_drag_lock.c)
+target_sources_ifdef(CONFIG_FROST_FEATURES app PRIVATE src/frost_features.c)
+target_sources_ifdef(CONFIG_FROST_BLE_GUIDE app PRIVATE src/frost_ble_guide.c)

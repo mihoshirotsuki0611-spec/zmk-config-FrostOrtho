@@ -27,7 +27,11 @@
         5 // Y 左クリック
         6 // U スクロール(L5)
         7 // I 右クリック
-        20 // Z Shift
+        8 // O ドラッグ固定
+        20 // Z 取り消し / Shift
+        21 // X 切り取り
+        22 // C コピー
+        23 // V 貼り付け
         30 // Del / Cmd
         32 // Alt
     >;
@@ -53,6 +57,16 @@
 };
 
 / {
+    zip_scroll_snap: zip_scroll_snap {
+        compatible = "zmk,input-processor-scroll-snap";
+        #input-processor-cells = <0>;
+        lock-threshold = <4>; // 向きを決めるまでの移動量
+        release-ms = <200>;   // 止めてからこの時間で固定解除
+        ratio-percent = <150>; // 横が縦の1.5倍を超えたら横スクロール
+    };
+};
+
+/ {
     trackball_listener: trackball_listener {
         status = "okay";
         compatible = "zmk,input-listener";
@@ -62,7 +76,7 @@
         input-processors = <
             &mouse_runtime_input_processor
             &zip_temp_layer 4 100000 // AMLレイヤー(4)、タイムアウト時間
-            &zip_xy_scaler 2 3 // カーソル移動量2/3倍
+            &zip_xy_scaler 3 5 // カーソル移動量3/5倍(2/3から少し遅く)
             &zip_xy_transform INPUT_TRANSFORM_X_INVERT // カーソルの移動方向調整
             &zip_xy_transform INPUT_TRANSFORM_Y_INVERT // カーソルの移動方向調整
         >;
@@ -76,8 +90,9 @@
             // &scroll_runtime_input_processor
             &zip_scroll_transform (INPUT_TRANSFORM_X_INVERT) // スクロール方向調整
             &zip_xy_to_scroll_mapper
-            &zip_scroll_x_scaler 0 3 // X軸スクロール量0/3倍
-            &zip_scroll_y_scaler 2 3 // Y軸スクロール量2/3倍
+            &zip_scroll_snap // 縦か横のどちらか一方に固定(動かし始めの向き)
+            &zip_scroll_x_scaler 3 5 // X軸(横)スクロール量3/5倍 ボールを横に転がすと横スクロール
+            &zip_scroll_y_scaler 3 5 // Y軸スクロール量3/5倍(2/3から少し遅く)
         >;
     };
     // 精密モード(レイヤー12): カーソル移動量を1/3に。process-nextで通常の処理も続けて通す

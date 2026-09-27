@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FrostOrtho レイヤーガイド</title>
+<script>
+// Android(DeX)版アプリの中で開かれたとき(#android)は、小窓だけを表示する
+if(location.hash==='#android'){document.documentElement.classList.add('android');document.querySelector('meta[name=viewport]').setAttribute('content','width=700');}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap">
+<style id="ov-style">
+:root{
+  --paper:#fffaf0;--paper-edge:#efe3c8;--ink:#5b4a3a;--mute:#a38f78;
+  --leaf:#7cc49a;--leaf-deep:#4f9f73;
+  --cap:#fffdf8;--cap-shadow:#eadcc0;--pad:#f4ecdc;
+  --hold:#ffb98a;--hold-ink:#7a3f18;--hold-shadow:#e99a66;
+  --mod:#f3ecff;--mod-shadow:#ddd0f3;
+  --press:#ffd54a;
+  --t0:#bfe3c9;--t1:#ffc4c0;--t2:#bfeccf;--t3:#ffe7a3;--t4:#bfe0ff;--t5:#ffc9ec;--t6:#bdeff0;--t7:#e3dcff;
+}
+#ov{font-family:"Hiragino Maru Gothic ProN","M PLUS Rounded 1c","Hiragino Sans",system-ui,sans-serif;background:var(--paper);color:var(--ink);
+  border-radius:22px;padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;box-sizing:border-box;width:100%;user-select:none;
+  border:3px solid var(--paper-edge);box-shadow:0 6px 0 var(--paper-edge)}
+#ov .bar{display:flex;align-items:center;gap:10px;min-height:30px}
+#ov .chip{flex-shrink:0;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:4px 14px 5px;border-radius:999px;background:var(--tone,var(--t0));
+  font-weight:800;font-size:15px;box-shadow:0 3px 0 rgba(91,74,58,.15);}
+#ov .chip::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--ink);opacity:.35}
+#ov .hint{font-size:12px;color:var(--mute);font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#ov .enc{font-size:11px;font-weight:700;background:#fff;border-radius:999px;padding:3px 10px;box-shadow:0 2px 0 var(--cap-shadow);white-space:nowrap}
+#ov .enc:empty{display:none}
+#ov #batt{font-weight:700;color:var(--ink)}
+#ov .conn{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--mute);white-space:nowrap}
+#ov .dot{width:9px;height:9px;border-radius:50%;background:#f39a8f}
+#ov .dot.on{background:var(--leaf)}
+#ov .badges{display:flex;gap:6px;flex-wrap:wrap}
+#ov .badges:empty{display:none}
+#ov .badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--press);color:#6b4e00;box-shadow:0 2px 0 #e6b92f}
+#ov .badge.voice{background:#bdeff0;color:#1f5f60;box-shadow:0 2px 0 #8fd3d4}
+#ov .badge.err{background:#ffc4c0;color:#7a2a24;box-shadow:0 2px 0 #eea39d}
+#ov .badge.info{background:#fff;color:var(--ink);box-shadow:0 2px 0 var(--cap-shadow);font-weight:700}
+#ov .foot{font-size:10.5px;color:var(--mute);display:flex;gap:10px;flex-wrap:wrap}
+#ov .foot:empty{display:none}
+#ov .foot b{color:var(--ink);font-weight:700}
+#ov .helpbtn{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:#fff;color:var(--ink);font:inherit;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 2px 0 var(--cap-shadow)}
+#ov .helpbtn:focus-visible{outline:3px solid var(--press)}
+#ov .help{display:none;max-height:260px;overflow:auto;padding-right:4px}
+#ov.showhelp .help{display:block}
+#ov.showhelp .halves,#ov.showhelp .foot,#ov.showhelp .badges{display:none}
+.fgroup{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.fgroup h3{margin:0;font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px}
+.fgroup h3::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--gc,#7cc49a)}
+.fitem{background:#fffdf8;border-radius:12px;padding:8px 12px;box-shadow:0 2px 0 #eadcc0;display:grid;grid-template-columns:8.5em 1fr;gap:4px 12px;font-size:12px;line-height:1.6}
+.fitem b{font-weight:800;color:#5b4a3a}
+.fitem span{color:#7a6754}
+.fitem kbd{font-family:inherit;font-weight:700;background:#f4ecdc;border-radius:6px;padding:0 5px;color:#5b4a3a}
+@media (max-width:520px){.fitem{grid-template-columns:1fr}}
+#ov .halves{display:flex;gap:12px}
+#ov .half{flex:1;background:var(--tone-soft,#f7f0e1);border-radius:18px;padding:8px;display:grid;gap:6px;}
+#ov .L{grid-template-columns:repeat(6,1fr)}
+#ov .R{grid-template-columns:repeat(5,1fr)}
+#ov .k{position:relative;height:50px;border-radius:13px;background:var(--cap);box-shadow:0 3px 0 var(--cap-shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.12;text-align:center;overflow:hidden;
+  transition:transform .08s ease-out, box-shadow .08s ease-out}
+#ov .k .h{font-size:8.5px;font-weight:700;opacity:.8;margin-bottom:1px;letter-spacing:.02em}
+#ov .k .t{font-size:10.5px;font-weight:700;padding:0 3px;word-break:keep-all;overflow-wrap:anywhere}
+#ov .k .s{font-size:8.5px;font-weight:500;color:var(--mute);margin-top:2px}
+#ov .k.none{background:transparent;box-shadow:none;border:2px dotted rgba(163,143,120,.25)}
+#ov .k.ghost{background:rgba(255,253,248,.45);box-shadow:none!important;color:rgba(91,74,58,.35)}
+#ov .k.ghost .s{display:none}
+#ov .k.lt{background:var(--hold);color:var(--hold-ink);box-shadow:0 3px 0 var(--hold-shadow)}
+#ov .k.mt{background:var(--mod);box-shadow:0 3px 0 var(--mod-shadow)}
+#ov .k.mo{background:var(--leaf);color:#fff;box-shadow:0 3px 0 var(--leaf-deep)}
+#ov .k.act{background:#fff;box-shadow:0 3px 0 var(--cap-shadow), inset 0 0 0 2px var(--tone,var(--t0))}
+#ov .k.pad{visibility:hidden}
+#ov .k.down{transform:translateY(3px);box-shadow:0 0 0 3px var(--press)}
+@media (prefers-reduced-motion:reduce){#ov .k,#ov .chip,#ov .half{transition:none}}
+</style>
+<style>
+html.android body{padding:0;background:transparent}
+html.android .wrap{max-width:none;gap:0}
+html.android .wrap>*:not(#home){display:none}
+html.android #ov{border-radius:0;border:0;box-shadow:none}
+.fh{font-size:17px;margin:8px 0 0;font-weight:800}
+
+body{margin:0;background:#f6efe0;color:#5b4a3a;font-family:"Hiragino Maru Gothic ProN","M PLUS Rounded 1c",system-ui,sans-serif;padding:28px 16px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:20px;margin:0;font-weight:800}
+p{margin:0;color:#8a7662;font-size:13px;line-height:1.8}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+button{font:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;border:0;background:#fffaf0;color:#5b4a3a;cursor:pointer;box-shadow:0 4px 0 #e2d3b3}
+button.primary{background:#7cc49a;color:#fff;box-shadow:0 4px 0 #4f9f73}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #e2d3b3}
+button:focus-visible{outline:3px solid #ffd54a;outline-offset:2px}
+#msg{font-size:13px;color:#c0672f;min-height:1em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>FrostOrtho レイヤーガイド</h1>
+  <p>キーボードをつないで「小窓で表示」を押すと、常に最前面に浮かぶ小窓が開きます。レイヤーキーを押している間は、そのレイヤーで何ができるかが出ます。</p>
+  <p>オレンジのキー = 長押しで上の名前のレイヤーへ ・ むらさき = 長押しで修飾キー ・ 大きい文字 = できること、小さい文字 = ショートカット</p>
+  <div class="btns">
+    <button id="connect" class="primary">キーボードに接続</button>
+    <button id="pip">小窓で表示</button>
+  </div>
+  <div id="msg"></div>
+  <div id="home">
+  <div id="ov">
+    <div class="bar"><span class="chip" id="lname">基本</span><span class="hint" id="lhint"></span><span class="enc" id="lenc"></span><span class="conn"><span id="batt"></span><span id="st">未接続</span><span class="dot" id="dot"></span></span><button class="helpbtn" id="helpbtn" title="機能一覧">？</button></div>
+    <div class="badges" id="badges"></div>
+    <div class="halves"><div class="half L" id="hl"></div><div class="half R" id="hr"></div></div>
+    <div class="foot" id="foot"></div>
+    <div class="help" id="help"></div>
+  </div>
+  </div>
+  <h2 class="fh">機能一覧</h2>
+  <p>小窓の右上の「？」を押しても、この一覧に切り替わります。もう一度押すとキーボードの図に戻ります。</p>
+  <div class="flist" id="flist"></div>
+</div>
+<script>
+const LAYERS=[{"enc": "スクロール", "name": "基本", "hint": "ふつうの文字入力", "tone": 0, "keys": [{"k": "key", "t": "Q"}, {"k": "key", "t": "W"}, {"k": "key", "t": "E"}, {"k": "key", "t": "R"}, {"k": "key", "t": "T"}, {"k": "key", "t": "Y"}, {"k": "key", "t": "U"}, {"k": "key", "t": "I"}, {"k": "key", "t": "O"}, {"k": "key", "t": "P"}, {"k": "key", "t": "A"}, {"k": "key", "t": "S"}, {"k": "key", "t": "D"}, {"k": "key", "t": "F"}, {"k": "key", "t": "G"}, {"k": "key", "t": "H"}, {"k": "key", "t": "J"}, {"k": "key", "t": "K"}, {"k": "key", "t": "L"}, {"k": "key", "t": "-"}, {"k": "mt", "t": "Z", "h": "⇧"}, {"k": "key", "t": "X"}, {"k": "key", "t": "C"}, {"k": "key", "t": "V"}, {"k": "key", "t": "B"}, {"k": "key", "t": "N"}, {"k": "key", "t": "M"}, {"k": "key", "t": ","}, {"k": "key", "t": "."}, {"k": "mt", "t": "/", "h": "⇧"}, {"k": "mt", "t": "Del", "h": "⌘"}, {"k": "lt", "t": "Tab", "h": "設定", "to": 6}, {"k": "key", "t": "⌥ Alt"}, {"k": "lt", "t": "英数", "h": "記号", "to": 1}, {"k": "lt", "t": "Space", "h": "数字", "to": 2}, {"k": "mt", "t": "かな", "h": "⌘"}, {"k": "lt", "t": "Bksp", "h": "移動", "to": 3, "s": "2回目長押し=連打"}, {"k": "lt", "t": "Enter", "h": "ショート", "to": 7}, {"k": "key", "t": "大文字", "s": "Caps Word", "h": ""}, {"k": "key", "t": "音声入力", "s": "長押し/2回タップ", "h": ""}, {"k": "key", "t": "スクショ", "s": "⌘Vで貼れる", "h": ""}]}, {"enc": "拡大・縮小", "name": "記号", "hint": "記号 と Bluetooth", "tone": 1, "keys": [{"k": "key", "t": "?"}, {"k": "key", "t": "\""}, {"k": "key", "t": "&"}, {"k": "key", "t": "!"}, {"k": "key", "t": "."}, {"k": "key", "t": "-"}, {"k": "key", "t": "_"}, {"k": "key", "t": "|"}, {"k": "key", "t": "("}, {"k": "key", "t": ")"}, {"k": "key", "t": "@"}, {"k": "key", "t": "/"}, {"k": "key", "t": ":"}, {"k": "none"}, {"k": "key", "t": "%"}, {"k": "key", "t": "#"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "["}, {"k": "key", "t": "]"}, {"k": "key", "t": "?"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "~"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "{"}, {"k": "key", "t": "}"}, {"k": "key", "t": "Esc"}, {"k": "key", "t": "接続先消去", "s": ""}, {"k": "key", "t": "全部消去", "s": ""}, {"k": "none"}, {"k": "none"}, {"k": "mo", "t": "設定", "h": "押す間", "to": 6}, {"k": "key", "t": "録画など", "s": "⌘⇧5"}, {"k": "none"}, {"k": "trans"}, {"k": "key", "t": "<"}, {"k": "key", "t": ">"}]}, {"enc": "音量", "name": "数字", "hint": "数字 と Fキー", "tone": 2, "keys": [{"k": "key", "t": "F1"}, {"k": "key", "t": "F2"}, {"k": "key", "t": "F3"}, {"k": "key", "t": "F4"}, {"k": "key", "t": "F5"}, {"k": "key", "t": "1"}, {"k": "key", "t": "2"}, {"k": "key", "t": "3"}, {"k": "key", "t": "+"}, {"k": "key", "t": "-"}, {"k": "key", "t": "F6"}, {"k": "key", "t": "F7"}, {"k": "key", "t": "F8"}, {"k": "key", "t": "F9"}, {"k": "key", "t": "F10"}, {"k": "key", "t": "4"}, {"k": "key", "t": "5"}, {"k": "key", "t": "6"}, {"k": "key", "t": "*"}, {"k": "key", "t": "/"}, {"k": "key", "t": "F11"}, {"k": "key", "t": "F12"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "7"}, {"k": "key", "t": "8"}, {"k": "key", "t": "9"}, {"k": "none"}, {"k": "key", "t": "="}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "."}, {"k": "key", "t": "0"}, {"k": "trans"}, {"k": "none"}, {"k": "none"}]}, {"enc": "タブ切替", "name": "移動", "hint": "カーソル・デスクトップ移動・音楽", "tone": 3, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "窓の一覧", "s": "⌃↑"}, {"k": "key", "t": "左の画面", "s": "⌃←"}, {"k": "key", "t": "↑"}, {"k": "key", "t": "右の画面", "s": "⌃→"}, {"k": "key", "t": "アプリの窓", "s": "⌃↓"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "行の先頭", "s": "⌃A"}, {"k": "key", "t": "←"}, {"k": "key", "t": "↓"}, {"k": "key", "t": "→"}, {"k": "key", "t": "行の末尾", "s": "⌃E"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "前の曲", "s": ""}, {"k": "key", "t": "行頭へ", "s": "⌘←"}, {"k": "none"}, {"k": "key", "t": "行末へ", "s": "⌘→"}, {"k": "key", "t": "次の曲", "s": ""}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "trans"}, {"k": "key", "t": "暗く", "s": ""}, {"k": "key", "t": "明るく", "s": ""}]}, {"enc": "", "name": "マウス", "hint": "クリック・編集 / Uを押しながら転がすとスクロール", "tone": 4, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "左クリック"}, {"k": "mo", "t": "スクロール", "h": "押す間", "to": 5}, {"k": "key", "t": "右クリック"}, {"k": "key", "t": "ドラッグ固定", "s": "再押しで解除", "h": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "mt", "t": "取り消し", "s": "⌘Z", "h": "⇧"}, {"k": "key", "t": "切り取り", "s": "⌘X", "h": ""}, {"k": "key", "t": "コピー", "s": "⌘C", "h": ""}, {"k": "key", "t": "貼り付け", "s": "⌘V", "h": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}]}, {"enc": "", "name": "スクロール", "hint": "ボールを転がしてスクロール(縦・横)", "tone": 5, "keys": [{"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "trans"}, {"k": "none"}, {"k": "none"}]}, {"enc": "", "name": "設定", "hint": "接続先の切り替え・リセット", "tone": 6, "keys": [{"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "接続先 0"}, {"k": "key", "t": "接続先 1"}, {"k": "key", "t": "接続先 2"}, {"k": "key", "t": "接続先 3"}, {"k": "key", "t": "接続先 4"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "mo", "t": "DeXモード", "h": "切替", "s": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "mo", "t": "精密モード", "h": "切替", "s": ""}, {"k": "none"}, {"k": "none"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "none"}, {"k": "key", "t": "Studio解除", "s": "", "h": ""}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "書込モード", "s": ""}, {"k": "trans"}, {"k": "key", "t": "接続先消去", "s": ""}, {"k": "key", "t": "全部消去", "s": ""}]}, {"enc": "", "name": "ショートカット", "hint": "タブとウィンドウの操作", "tone": 7, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "新しいタブ", "s": "⌘T"}, {"k": "key", "t": "アドレスバー", "s": "⌘L"}, {"k": "key", "t": "前のタブ", "s": "⇧⌃Tab"}, {"k": "key", "t": "戻る", "s": "⌘["}, {"k": "key", "t": "タブを検索", "s": "⌘⇧A"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "タブを閉じる", "s": "⌘W"}, {"k": "key", "t": "タブ復活", "s": "⌘⇧T"}, {"k": "key", "t": "次のタブ", "s": "⌃Tab"}, {"k": "key", "t": "進む", "s": "⌘]"}, {"k": "key", "t": "アプリ切替", "s": "⌘Tab"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "アプリを終了", "s": "⌘Q", "h": ""}, {"k": "key", "t": "左半分", "s": "⌃⌥←", "h": ""}, {"k": "key", "t": "最大化", "s": "⌃⌥↩", "h": ""}, {"k": "key", "t": "右半分", "s": "⌃⌥→", "h": ""}, {"k": "key", "t": "クイック検索", "s": "⌘K"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}]}, {"enc": "", "name": "DeX", "hint": "DeXモード中", "tone": 2, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "mt", "t": "Del", "h": "⌃"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "mt", "t": "かな", "h": "⌃"}, {"k": "lt", "t": "Bksp", "h": "DeX移動", "to": 9, "s": "2回目長押し=連打"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "範囲スクショ", "s": "ガイドアプリ", "h": ""}]}, {"enc": "", "name": "DeX 移動", "hint": "DeXのウィンドウ・移動", "tone": 3, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "⌃↑"}, {"k": "key", "t": "⌃←"}, {"k": "key", "t": "↑"}, {"k": "key", "t": "⌃→"}, {"k": "key", "t": "⌃↓"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "行の先頭", "s": "⌃A"}, {"k": "key", "t": "←"}, {"k": "key", "t": "↓"}, {"k": "key", "t": "→"}, {"k": "key", "t": "行の末尾", "s": "⌃E"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "前の曲", "s": ""}, {"k": "key", "t": "分割 左", "s": "⌘⌃←", "h": ""}, {"k": "key", "t": "最大化", "s": "⌘⌃↑", "h": ""}, {"k": "key", "t": "分割 右", "s": "⌘⌃→", "h": ""}, {"k": "key", "t": "次の曲", "s": ""}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "trans"}, {"k": "key", "t": "暗く", "s": ""}, {"k": "key", "t": "明るく", "s": ""}]}, {"enc": "", "name": "マウス(DeX)", "hint": "クリック・編集(DeX用) / Uを押しながら転がすとスクロール", "tone": 0, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "mt", "t": "取り消し", "s": "⌃Z", "h": "⇧"}, {"k": "key", "t": "切り取り", "s": "⌃X", "h": ""}, {"k": "key", "t": "コピー", "s": "⌃C", "h": ""}, {"k": "key", "t": "貼り付け", "s": "⌃V", "h": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}]}, {"enc": "", "name": "ショートカット(DeX)", "hint": "タブ・画面分割・通知など(Fold8用)", "tone": 0, "keys": [{"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "新しいタブ", "s": "⌃T", "h": ""}, {"k": "key", "t": "アドレスバー", "s": "⌃L", "h": ""}, {"k": "trans"}, {"k": "key", "t": "戻る", "s": "⌘Bksp", "h": ""}, {"k": "key", "t": "タブを検索", "s": "⌃⇧A", "h": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "タブを閉じる", "s": "⌃W", "h": ""}, {"k": "key", "t": "タブ復活", "s": "⌃⇧T", "h": ""}, {"k": "trans"}, {"k": "key", "t": "進む", "s": "Alt+→", "h": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "key", "t": "アプリを終了", "s": "Alt+F4", "h": ""}, {"k": "key", "t": "分割 左", "s": "⌘⌃←", "h": ""}, {"k": "key", "t": "最大化", "s": "⌘⌃↑", "h": ""}, {"k": "key", "t": "分割 右", "s": "⌘⌃→", "h": ""}, {"k": "key", "t": "通知", "s": "⌘N", "h": ""}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}, {"k": "trans"}]}, {"enc": "", "name": "精密", "hint": "カーソルをゆっくり動かす", "tone": 4, "keys": [{"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "左クリック"}, {"k": "key", "t": "右クリック"}, {"k": "key", "t": "中クリック"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "trans"}, {"k": "none"}, {"k": "mo", "t": "精密モード", "h": "切替", "s": ""}]}, {"enc": "", "name": "ジェスチャー", "hint": "ジェスチャー", "tone": 5, "keys": [{"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "アプリの窓", "s": "⌃↓"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "右の画面", "s": "⌃→"}, {"k": "none"}, {"k": "key", "t": "左の画面", "s": "⌃←"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "key", "t": "窓の一覧", "s": "⌃↑"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "none"}, {"k": "trans"}, {"k": "none"}, {"k": "none"}]}];
+const COMBOS=[{"keys": "K+L", "what": "スクロール"}, {"keys": "I+O", "what": "ジェスチャー"}, {"keys": "Q+A+Z", "what": "接続先5"}, {"keys": "O+B+T", "what": "書込モード"}];
+// 見た目上「同じレイヤー」として濃く表示する組み合わせ(DeXモード=基本、DeXマウス=マウス)
+const SAME={8:[0],10:[4],11:[7]}; let SHOWN=0;
+// FrostOrtho の物理配置(キー番号) — 左:上3段5キー+最下段6キー / 右:上3段5キー+最下段5キー
+const LEFT=[0,1,2,3,4,-1, 10,11,12,13,14,-1, 20,21,22,23,24,-1, 30,31,32,33,34,35];
+const RIGHT=[5,6,7,8,9, 15,16,17,18,19, 25,26,27,28,29, 36,37,38,39,40];
+let mask=1; const down=new Set(); let batt=''; let st={caps:0,drag:0,prof:-1,conn:0}; let voice={s:'idle',t:''};
+const $=id=>document.getElementById(id);
+const OV=document.getElementById('ov');
+function topLayer(m){for(let i=31;i>=0;i--) if(m&(1<<i)) return i; return 0;}
+function resolve(pos,layer,m){
+  for(let l=layer;l>=0;l--){ if(!(m&(1<<l))&&l!==0) continue; const k=LAYERS[l]&&LAYERS[l].keys[pos]; if(k&&k.k!=='trans') return {k,own:l===layer||l===SHOWN||(SAME[layer]||[]).includes(l)}; }
+  return {k:{k:'none'},own:true};
+}
+function cell(pos,layer){
+  const el=document.createElement('div');
+  if(pos<0){el.className='k pad';return el;}
+  const {k,own}=resolve(pos,layer,mask);
+  el.className='k '+(k.k==='key'?(k.s&&layer!==0?'act':''):k.k)+(own?'':' ghost')+(down.has(pos)?' down':'');
+  if(k.k!=='none'){
+    if(k.h){const h=document.createElement('span');h.className='h';h.textContent=k.h;el.appendChild(h);}
+    const t=document.createElement('span');t.className='t';t.textContent=k.t||'';el.appendChild(t);
+    if(k.s){const s=document.createElement('span');s.className='s';s.textContent=k.s;el.appendChild(s);}
+  }
+  return el;
+}
+// 先読み: レイヤーキーを押して少し経ったら(=タップではなさそうなら)、キーボードの判定を待たずに先に表示する
+const PREVIEW_MS=120; let preview=null, pvTimer=null;
+function curLayer(){ return topLayer(mask); }
+function onKey(pos,pressed){
+  if(pressed){
+    const k=(LAYERS[curLayer()]||{keys:[]}).keys[pos];
+    const r=k&&k.k==='trans'?resolve(pos,curLayer(),mask).k:k;
+    if(r&&r.to!=null){ clearTimeout(pvTimer); pvTimer=setTimeout(()=>{preview={pos,to:r.to};render();},r.k==='mo'?0:PREVIEW_MS); }
+    else if(pvTimer&&!preview){ clearTimeout(pvTimer); pvTimer=null; } // 他のキーが先に来たらタップ扱い
+  }else if(preview&&preview.pos===pos||pvTimer){ clearTimeout(pvTimer); pvTimer=null; if(preview&&preview.pos===pos){preview=null;} }
+}
+function render(){
+  const doc=OV.ownerDocument; let m=mask;
+  if(preview) m=(mask|(1<<preview.to))>>>0;
+  const L=topLayer(m); const saved=mask; mask=m;
+  // 表示名に使うレイヤー: DeXモード(8)は常時オンの土台なので、その下で押しているレイヤーがあればそちらを名前にする
+  let NL=L; if(L===8){ const rest=(m&~(1<<8)&~1)>>>0; if(rest) NL=topLayer(rest); }
+  SHOWN=NL;
+  const hl=doc.getElementById('hl'), hr=doc.getElementById('hr');
+  hl.replaceChildren(...LEFT.map(p=>cell(p,L))); hr.replaceChildren(...RIGHT.map(p=>cell(p,L)));
+  mask=saved;
+  const info=LAYERS[NL]||{name:'レイヤー'+L,hint:'',tone:0};
+  doc.getElementById('lname').textContent=info.name;
+  doc.getElementById('lhint').textContent=info.hint||'';
+  let enc=''; for(let l=L;l>=0;l--){ if((m&(1<<l))||l===0){ if(LAYERS[l]&&LAYERS[l].enc){enc=LAYERS[l].enc;break;} } }
+  doc.getElementById('lenc').textContent=enc?('つまみ: '+enc):'';
+  doc.getElementById('batt').textContent=batt;
+  const bd=[];
+  if(voice.s==='listening') bd.push('<span class="badge voice">聞き取り中…'+(voice.t?' 「'+voice.t.replace(/[<>&]/g,'')+'」':'')+'</span>');
+  if(voice.s==='select') bd.push('<span class="badge voice">範囲スクショ: '+voice.t.replace(/[<>&]/g,'')+'</span>');
+  if(voice.s==='done') bd.push('<span class="badge info">'+voice.t.replace(/[<>&]/g,'')+'</span>');
+  if(voice.s==='processing') bd.push('<span class="badge voice">文字にしています…</span>');
+  if(voice.s==='error') bd.push('<span class="badge err">'+voice.t.replace(/[<>&]/g,'')+'</span>');
+  if(st.caps) bd.push('<span class="badge">大文字モード中</span>');
+  if(st.drag) bd.push('<span class="badge">ドラッグ中(Oで離す)</span>');
+  if(st.prof>=0) bd.push('<span class="badge info">接続先 '+st.prof+(st.conn?'':'(待機中)')+((m&(1<<8))?' ・ DeXモード':'')+'</span>');
+  doc.getElementById('badges').innerHTML=bd.join('');
+  doc.getElementById('foot').innerHTML=(NL===0||NL===8)?('同時押し: '+COMBOS.map(c=>'<b>'+c.keys+'</b> '+c.what).join(' ・ ')):'';
+  OV.style.setProperty('--tone','var(--t'+info.tone+')');
+  OV.style.setProperty('--tone-soft','color-mix(in srgb, var(--t'+info.tone+') 35%, #f7f0e1)');
+}
+// ---- WebHID(キーボードからレイヤーとキー押下を受け取る) ----
+const FILTER={usagePage:0xFF60,usage:0x61};
+let dev=null;
+function setStatus(on,text){const d=OV.ownerDocument;d.getElementById('dot').classList.toggle('on',on);d.getElementById('st').textContent=text;}
+function onReport(e){
+  const b=new Uint8Array(e.data.buffer,e.data.byteOffset,e.data.byteLength);
+  const MK=[0xFF,0xF1,0xB1,0xC1]; const i=MK.includes(b[0])?0:1;
+  if(b[i]===0xFF){ mask=(b[i+6]|(b[i+7]<<8)|(b[i+8]<<16)|(b[i+9]<<24))>>>0 || 1; render(); }
+  else if(b[i]===0xC1){ st={caps:b[i+1],drag:b[i+2],prof:b[i+3],conn:b[i+4]}; render(); }
+  else if(b[i]===0xB1){ const f=v=>v===255?'--':v+'%'; batt='左 '+f(b[i+1])+' ・ 右 '+f(b[i+2]); render(); }
+  else if(b[i]===0xF1){ const p=b[i+2]; if(b[i+3]) down.add(p); else down.delete(p); onKey(p,!!b[i+3]); render(); }
+}
+async function openDev(d){
+  try{ if(!d.opened) await d.open(); dev=d; d.addEventListener('inputreport',onReport); setStatus(true,'接続中'); $('msg').textContent=''; }
+  catch(err){ $('msg').textContent='接続できませんでした: '+err.message; }
+}
+async function autoConnect(){
+  if(!('hid' in navigator)){ $('msg').textContent='このブラウザでは使えません。Google Chrome で開いてください。'; return; }
+  const ds=await navigator.hid.getDevices();
+  const d=ds.find(x=>x.collections.some(c=>c.usagePage===FILTER.usagePage));
+  if(d) openDev(d);
+}
+$('connect').onclick=async()=>{
+  if(!('hid' in navigator)){ $('msg').textContent='このブラウザでは使えません。Google Chrome で開いてください。'; return; }
+  try{ const [d]=await navigator.hid.requestDevice({filters:[FILTER]}); if(d) openDev(d); else $('msg').textContent='キーボードが選ばれませんでした。'; }
+  catch(err){ $('msg').textContent=err.message; }
+};
+if('hid' in navigator){
+  navigator.hid.addEventListener('disconnect',e=>{ if(e.device===dev){ dev=null; setStatus(false,'切断'); down.clear(); mask=1; render(); } });
+  navigator.hid.addEventListener('connect',e=>{ if(e.device.collections.some(c=>c.usagePage===FILTER.usagePage)) openDev(e.device); });
+}
+// ---- 常に最前面の小窓(Document Picture-in-Picture) ----
+$('pip').onclick=async()=>{
+  if(!('documentPictureInPicture' in window)){ $('msg').textContent='小窓表示は Google Chrome(バージョン116以降)で使えます。'; return; }
+  const ov=OV;
+  const w=await documentPictureInPicture.requestWindow({width:700,height:340});
+  w.document.head.appendChild(document.getElementById('ov-style').cloneNode(true));
+  w.document.body.style.cssText='margin:0;padding:6px;background:#f6efe0';
+  w.document.body.appendChild(ov);
+  render();
+  w.addEventListener('pagehide',()=>{ $('home').appendChild(ov); render(); });
+};
+
+// ---- 機能一覧(キーボードの設定を変えたらここも更新) ----
+const FEATURES=[
+ {g:'よく使う操作',c:'#ffb98a',items:[
+  ['Bksp を連打','Bksp を <kbd>トン</kbd> と1回押して、すぐもう一度押して長押し'],
+  ['大文字モード','I の下のキーを1回押す → 次のスペースまで大文字'],
+  ['スクショをコピー','右下のキー → 範囲を選ぶと画像がコピーされる。<kbd>⌘V</kbd> で貼る(Fold8 では範囲スクショ)'],
+  ['窓を左右に寄せる','Enter 長押し + <kbd>M</kbd> 左 ・ <kbd>,</kbd> 最大化 ・ <kbd>.</kbd> 右(Mac は Rectangle が必要、Fold8 は画面分割になる)'],
+  ['音声入力(DeX)','F13 を長押し=押している間だけ聞き取る ・ 2回タップ=もう一度 F13 を押すまで聞き取る。文字は入力中の欄に入る(スマホのガイドアプリが必要)'],
+  ['アプリの切り替え(スマホ)','Enter 長押し + <kbd>-</kbd> → 最近使ったアプリの一覧が出る。矢印キーかボールで選ぶ(DeXモード中)'],
+  ['アプリを一覧から消す(スマホ)','カードにカーソルを合わせて <kbd>Y</kbd> を押したままボールを上へ(または <kbd>O</kbd> ドラッグ固定 → 上へ → <kbd>O</kbd>)。全部なら「すべて閉じる」をクリック'],
+  ['範囲スクショ(Fold8)','右下のキー → 画面が止まるので、範囲をドラッグ(Y を押したままボール)か、2か所をクリック。撮った画像はコピーされ、写真にも保存。やめるときはもう一度右下のキー(ガイドアプリが必要)'],
+  ['Mac と Fold8 で同じキー','Enter 長押しのショートカットは、DeXモード中は自動で Fold8 用に切り替わる(タブ・戻る/進む・画面分割・通知・アプリを終了)。'],
+ ]},
+ {g:'トラックボール',c:'#bfe0ff',items:[
+  ['マウスモード','ボールを動かすと自動で切り替わる。ほかの文字キーを打つと戻る'],
+  ['クリック','<kbd>Y</kbd> 左クリック ・ <kbd>I</kbd> 右クリック'],
+  ['スクロール','<kbd>U</kbd> を押しながら転がす(または <kbd>K</kbd>+<kbd>L</kbd> 同時押し)。縦か横か、動かし始めの向きで決まる'],
+  ['編集','マウスモード中に <kbd>Z</kbd> 取り消し ・ <kbd>X</kbd> 切り取り ・ <kbd>C</kbd> コピー ・ <kbd>V</kbd> 貼り付け(DeXでは自動で⌃に)'],
+  ['ドラッグ固定','マウスモード中に <kbd>O</kbd> → 押しっぱなしに。もう一度 <kbd>O</kbd> で離す(マウスモードを出ても自動で離す)'],
+  ['精密モード','Tab 長押し + <kbd>L</kbd> でオン → カーソルがゆっくりに。右下のキーでオフ'],
+ ]},
+ {g:'つまみ(ロータリーエンコーダー)',c:'#bfeccf',items:[
+  ['ふだん','スクロール'],
+  ['Space 長押し中','音量'],
+  ['英数 長押し中','拡大・縮小'],
+  ['Bksp 長押し中','タブの切り替え'],
+ ]},
+ {g:'接続とLED',c:'#ffe7a3',items:[
+  ['接続先の切り替え','Tab 長押し + <kbd>Y U I O P</kbd> = 接続先 0〜4 ・ <kbd>Q</kbd>+<kbd>A</kbd>+<kbd>Z</kbd> 同時押し = 接続先 5'],
+  ['DeXモード','接続先 3 か 4 を選ぶと自動でオン、ほかを選ぶとオフ(Tab 長押し + <kbd>H</kbd> で手動切替も可)'],
+  ['LEDの色','待機中の点滅の色: 0 青 ・ 1 緑 ・ 2 赤 ・ 3 黄 ・ 4 水色 ・ 5 ピンク'],
+  ['LEDの光り方','ふだん=消灯 ・ 待機中=接続先の色でゆっくり点滅 ・ 未登録の接続先=速く点滅 ・ キーで入るレイヤー中=レイヤーの色(記号 赤・数字 緑・移動 黄・設定 青・ショートカット 白) ・ つまみを回している間=水色'],
+  ['書き込みモード','<kbd>O</kbd>+<kbd>B</kbd>+<kbd>T</kbd> 同時押し(ファームウェアを入れ替えるとき)'],
+ ]},
+ {g:'このガイド',c:'#e3dcff',items:[
+  ['レイヤー表示','レイヤーキーを長押しすると、そのレイヤーで何ができるかが出る'],
+  ['状態の札','大文字モード中・ドラッグ中・接続先・DeXモードが上に出る'],
+  ['電池残量','右上に左右の電池残量'],
+ ]},
+];
+function featuresHTML(){
+  return FEATURES.map(g=>'<div class="fgroup" style="--gc:'+g.c+'"><h3>'+g.g+'</h3>'+g.items.map(([a,b])=>'<div class="fitem"><b>'+a+'</b><span>'+b+'</span></div>').join('')+'</div>').join('');
+}
+document.getElementById('flist').innerHTML=featuresHTML();
+document.getElementById('help').innerHTML=featuresHTML();
+document.getElementById('helpbtn').onclick=()=>{ OV.classList.toggle('showhelp'); };
+// Android(DeX)版アプリから呼ばれる入口
+window.frostPacket=arr=>onReport({data:new DataView(new Uint8Array(arr).buffer)});
+window.frostStatus=(on,text)=>setStatus(on,text);
+let voiceTimer=null;
+window.frostVoice=(state,text)=>{ voice={s:state,t:text||''}; clearTimeout(voiceTimer); if(state==='error'||state==='done') voiceTimer=setTimeout(()=>{voice={s:'idle',t:''};render();},4000); render(); };
+render(); if(!document.documentElement.classList.contains('android')) autoConnect();
+</script>
+</body>
+</html>

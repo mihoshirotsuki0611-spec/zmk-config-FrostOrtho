@@ -10,6 +10,10 @@ manifest:
       url-base: https://github.com/cormoran
     - name: imo00o
       url-base: https://github.com/imo00o
+    - name: zzeneg   # Raw HID(レイヤーガイド用)
+      url-base: https://github.com/zzeneg
+    - name: srwi     # レイヤー・キー押下の通知(レイヤーガイド用)
+      url-base: https://github.com/srwi
   projects:
     #　- name: zmk
     #   remote: zmkfirmware
@@ -40,5 +44,12 @@ manifest:
     - name: zmk-behavior-runtime-sensor-rotate
       remote: cormoran
       revision: zmk-v0.3.0.0
+    # レイヤーガイド(画面表示)用
+    - name: zmk-raw-hid
+      remote: zzeneg
+      revision: 6a37765dfab6197292e7a9f47305dcf87386d56a
+    - name: zmk-keypeek-layer-notifier
+      remote: srwi
+      revision: b600af3bb7d1795073a4ce23e08d6db46371551b
   self:
     path: config

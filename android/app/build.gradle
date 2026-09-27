@@ -1,0 +1,30 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'jp.frost.guide'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'jp.frost.guide'
+        minSdk 26
+        targetSdk 34
+        versionCode 3
+        versionName '1.2'
+    }
+    // 毎回同じ鍵で署名して、上書きインストールできるようにする(個人用の鍵)
+    signingConfigs {
+        frost {
+            storeFile file('frost-guide.keystore')
+            storePassword 'frostguide'
+            keyAlias 'frost'
+            keyPassword 'frostguide'
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.frost }
+        release { signingConfig signingConfigs.frost; minifyEnabled false }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

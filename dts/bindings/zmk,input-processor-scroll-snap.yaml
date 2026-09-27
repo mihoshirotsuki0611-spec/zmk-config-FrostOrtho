@@ -1,0 +1,19 @@
+description: スクロールを縦か横のどちらか一方に固定する(動かし始めの向きで決め、手を止めるまで維持)
+
+compatible: "zmk,input-processor-scroll-snap"
+
+include: ip_zero_param.yaml
+
+properties:
+  lock-threshold:
+    type: int
+    default: 4
+    description: 向きを決めるまでに必要な移動量
+  release-ms:
+    type: int
+    default: 200
+    description: この時間ボールが止まると向きの固定を解除する
+  ratio-percent:
+    type: int
+    default: 150
+    description: 横の動きが縦のこの割合(%)を超えたら横スクロールと判定する(縦を優先)

@@ -1,0 +1,3 @@
+description: ドラッグ固定(押すと左クリックを押しっぱなし、もう一度で離す)
+compatible: "zmk,behavior-frost-drag-lock"
+include: zero_param.yaml
