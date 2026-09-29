@@ -7,8 +7,8 @@ android {
         applicationId 'jp.frost.guide'
         minSdk 26
         targetSdk 34
-        versionCode 5
-        versionName '1.4'
+        versionCode 6
+        versionName '1.5'
     }
     // 毎回同じ鍵で署名して、上書きインストールできるようにする(個人用の鍵)
     signingConfigs {

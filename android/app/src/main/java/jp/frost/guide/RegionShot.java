@@ -35,20 +35,34 @@ class RegionShot {
     interface Listener { void onShotState(String state, String text); }
 
     private final AccessibilityService svc;
-    private final WindowManager wm;
+    private WindowManager wm;
+    private android.content.Context viewCtx;
     private SelectView view;
     private Bitmap frozen;
     private Listener listener;
 
     RegionShot(AccessibilityService svc) {
         this.svc = svc;
-        this.wm = svc.getSystemService(WindowManager.class);
+    }
+
+    /** 撮る画面を決める: DeX(外部ディスプレイ)がつながっていればそちら、なければスマホの画面 */
+    private Display targetDisplay() {
+        android.hardware.display.DisplayManager dm = svc.getSystemService(android.hardware.display.DisplayManager.class);
+        for (Display d : dm.getDisplays()) {
+            if (d.getDisplayId() != Display.DEFAULT_DISPLAY && d.getState() == Display.STATE_ON) return d;
+        }
+        return dm.getDisplay(Display.DEFAULT_DISPLAY);
     }
 
     void toggle(Listener l) {
         listener = l;
         if (view != null) { cancel(); return; }
-        svc.takeScreenshot(Display.DEFAULT_DISPLAY, svc.getMainExecutor(),
+        Display d = targetDisplay();
+        // 選ぶ画面も、撮った画面と同じディスプレイに出す
+        viewCtx = d.getDisplayId() == Display.DEFAULT_DISPLAY ? svc
+                : svc.createDisplayContext(d).createWindowContext(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, null);
+        wm = viewCtx.getSystemService(WindowManager.class);
+        svc.takeScreenshot(d.getDisplayId(), svc.getMainExecutor(),
                 new AccessibilityService.TakeScreenshotCallback() {
                     @Override
                     public void onSuccess(AccessibilityService.ScreenshotResult r) {
@@ -134,7 +148,7 @@ class RegionShot {
         private boolean dragging, firstPointSet;
 
         SelectView() {
-            super(svc);
+            super(viewCtx);
             dim.setColor(0x66000000);
             frame.setColor(0xFFFFD54A);
             frame.setStyle(Paint.Style.STROKE);
